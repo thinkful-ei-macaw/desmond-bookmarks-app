@@ -1,20 +1,46 @@
-const BASE_URL = 'https://thinkful-list-api.herokuapp.com/desmond';
+import store from './store.js';
+const BASE_URL = 'https://thinkful-list-api.herokuapp.com/desmondw';
 
-const getBookmarks = function() {
-  return fetch(BASE_URL + '/bookmarks');
-};
+function getFetch(...args) {
+  let error;
+  store.resetError();
+  return fetch(...args)
+    .then(res => {
+      if (!res.ok) {
+        error = { code: res.status };
+  
+        if (!res.headers.get('content-type').includes('json')) {
+          error.message = res.statusText;
+          return Promise.reject(error);
+        }
+      }
+  
+      return res.json();
+    })
+    .then(data => {
+      if (error) {
+        error.message = data.message;
+        return Promise.reject(error);
+      }
+      return data;
+    });
+}
 
-const createBookmark = function(obj) {
+function getData() {
+  return getFetch(`${BASE_URL}/bookmarks`);
+}
 
-  return fetch(`${BASE_URL}/bookmarks`, {method:'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(obj)});
-};
+function createNewBookmark(item) {
+  return getFetch(`${BASE_URL}/bookmarks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(item),
+  });
+}
 
-const deleteBookmark = function(id) {
-  return fetch(`${BASE_URL}/bookmarks/${id}`, {method: 'DELETE'});
-};
 
 export default {
-  getBookmarks,
-  createBookmark,
-  deleteBookmark
+  getData,
+  createNewBookmark,
+ 
 };
