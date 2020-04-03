@@ -5,6 +5,11 @@ function render() {
   $('main').html(generateLandingPage());
 }
 
+
+function renderBookmarks() {
+  $('#bookmark-list').html(listBookmarks());
+}
+
 function generateLandingPage() {
   return `
   <div class="bookmarks-container">
@@ -13,7 +18,7 @@ function generateLandingPage() {
   </div>
   <div class="ratings-container">
   <select class="filter-control" id="filter" aria-label='Filter ratings by minimum rating'>
-  <option value=''>All</option>
+  <option value='0'>All</option>
   <option value='5'>5 stars</option>
   <option value='4'>4 stars</option>
   <option value='3'>3 stars</option>
@@ -27,14 +32,15 @@ function generateLandingPage() {
   `;
 }
 
+
 function generateBookmarkForm() {
   return `<div class="bookmarks-container">
           <h1>Bookmarks</h1>
           <form id="bookmarks-form">
             <fieldset> 
-              <label for="title">Name: </label>
+              <label for="title">Title: </label>
               <input type="text" name="title" id="title" required><br>
-              <p>${store.error ? store.error : ''}</p>
+              <p>${store.store.error ? store.store.error.message : ''}</p>
               <label for="url">Website: </label>
               <input type="url" name="url" id="url" placeholder="https://" required><br>
               <label for="desc">Description:</label>
@@ -100,7 +106,15 @@ function createClick() {
       rating: $('#rating').val(),
       desc: $('#desc').val()
     };
-    api.createNewBookmark(newBookmark).then((bookmark) => store.addBookmark(bookmark)).then(() => render());
+    api.createNewBookmark(newBookmark)
+      .then((bookmark) => store.addBookmark(bookmark))
+      .then(() => render())
+      .catch((err)=>alert(err.message));
+      // .catch((err)=>{
+      //   store.setError(err);
+      //   $('main').html(generateBookmarkForm());
+      //   store.resetError();
+      // });
   });
 }
 
@@ -124,7 +138,8 @@ function deleteClick(){
 function handleFilter(){
   $('main').on('change', '#filter', function(){
     store.setFilter(event.target.value);
-    render();
+    renderBookmarks();
+
 
   });
 }
